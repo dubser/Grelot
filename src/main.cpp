@@ -1,5 +1,5 @@
 //
-// Occupation mémoire au début du développement 20 déc 2023
+//Occupation mémoire au début du développement 20 déc 2023
 //Sketch uses 230437 bytes (17%) of program storage space. Maximum is 1310720 bytes.
 //Global variables use 20968 bytes (6%) of dynamic memory, leaving 306712 bytes for local variables. Maximum is 327680 bytes.
 //================================================================================================================================
@@ -8,6 +8,7 @@
 // V30_30 Ré installé la classe et les fonctions dans un seul fichier 
 //        puisque incapable d'activer les methodes depuis une fonction
 // V30.31 Application completement fonctionelle et sommairement testée.
+// V30.32
 //================================================================================================================================
 #include <Arduino.h>
 //#include "WiFi.h" 
@@ -21,7 +22,6 @@ const int channel= 0;   // # de timer ESP32 Sound
 //================================================================================================================================
 
 class NbTimer
-
 {
    public:
       NbTimer(unsigned long interval , int timerType);
