@@ -319,7 +319,7 @@ return ;
 //================================================================================================================================
 // Io Pins nunber
 // int SoundPin= 19;   // Sortie de son Tone
-// int ledRPin = 32    // Red
+// int ledRPin = 32    // Red     
 // int ledGPin = 33;   // Green
 // int ledBPin = 25;   // Blue
 // int BpLPin  = 26;   // Bb Led on
@@ -335,7 +335,7 @@ void setup() {
 // Définition des I/O
 
 ledcAttachPin(SoundPin,channel);  // Assigner la sortie au son.
-int ledRPin = 32; // Red led
+int ledRPin = 32; // Red led  
 int ledGPin = 33; // Green led
 int ledBPin = 25; // Blue led 
 
