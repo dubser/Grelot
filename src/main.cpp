@@ -9,7 +9,24 @@
 //        puisque incapable d'activer les methodes depuis une fonction
 // V30.31 Application completement fonctionelle et sommairement testée.
 // V30.32
+// GrelotV1++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// V30.33 Version développée pour seeed_xiao_esp32s3
+// V30.34 Stopper la tune si on désactive le bouton pendant l'exécution.
+// V30.35 Version pour Esp32 XIAO
+// TODO
+// Rendre intermittent 20% On 80% Off  l'alerte de save battery
 //================================================================================================================================
+// Io Gpio number seeed_xiao_esp32s3
+
+ #define ledBPin   7  // Blue   
+ #define ledGPin   8  // Green
+ #define ledRPin   9  // Red  
+ #define BpLPin    4  // Bb Led on
+ #define BpSPin    5  // Bp Sound on
+ #define SoundPin  6  // Sortie de son Tone
+//================================================================================================================================
+
+//====================================================================================
 #include <Arduino.h>
 //#include "WiFi.h" 
 
@@ -96,10 +113,7 @@ NbTimer TmrPrint(1000,1);           // Tempo de DEBUG pour imprimer.
 //================================================================================================================================
 // Fonctions diverses.
 //================================================================================================================================
-int BpLPin=26;    // Interne Bp Led actif
-int BpSPin=27;    // Interne Bp Sound actif
-int SoundPin= 19; // Sortie de son Tone 
-bool ModeL=0;     // Mode L Led Actif
+bool ModeL=1;     // Mode L Led Actif
 bool ModeT=0;     // Mode T Tune Actif
 bool LastModeT=1; // Mode T Last
 int NoteInd=0;    // Note Index 
@@ -115,16 +129,20 @@ void PlayNote(void) {
 // Si la toune n'est pas terminée et que une note ou son internote
 // est terminée alors l'appel a PlayNote amorce la diffusion de la
 // prochaine note.
-
 //====================================================================================
 //                   il, sap  pe   lait  nez  rou  ge   ah  com   il
 const int melody[] = {392,392, 440, 392, 330, 262, 440, 392, 393, 440, 392, 440, 392, 262, 494, 349, 392, 349, 294, 494, 440, 392, 392, 440, 392, 440, 392, 440, 330, 392, 440, 392, 330, 262, 440, 392, 392, 440, 392, 440, 392, 262, 494, 349, 392, 349, 294, 494, 440, 392, 392, 440, 392, 440, 392, 294, 262, 440, 440, 262, 440, 392, 330, 392, 349, 440, 392, 349, 330, 294, 330, 392, 440, 494, 494, 494, 262, 262, 494, 440, 392, 349, 294, 392, 440, 392, 330, 262, 440, 392, 392, 440, 392, 440, 392, 262, 494, 349, 392, 349, 294, 494, 440, 392, 392, 440, 392, 440, 392, 294, 262, 0 };
 const int beat[]   = {  1,  2,   2,   1,   2,   2,   2,   4,   2,   2,   2,   2,   2,   2,   2,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   2,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4,   1,   2,   1,   2,   2,   2,   4, 0 };
 //const int beat[] = {50, 100, 100, 50,  100, 100, 100, 200, 100, 100, 100, 100, 100, 100, 100, 50,  100,  50, 100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200,  50, 100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50, 100,  50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 100, 100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 50,  100, 50,  100, 100, 100, 200, 0 };
 //====================================================================================
+// Si on désactive la tune pendant que ca joue. V30.34 
+if (NoteInd!=0 && ModeT==0) {
+  NoteInd=0;
+  ledcWriteTone(channel,0);     // Stopper la note
+return;
+}
 // Est-ce la 1e note 0 et ModeT est il actif.
 // Jouer cette note
-
 if (NoteInd==0 && ModeT==1) {
  sprintf(buffer,"                                       PLAYNOTE NoteInd %d ",NoteInd);
  Serial.println(buffer);
@@ -165,9 +183,6 @@ return;
 bool bSaL = 0; 
 bool bSaT = 0;
 //================================================================================================================================
-int ledRPin = 32; // Red led
-int ledGPin = 33; // Green led
-int ledBPin = 25; // Blue led 
 
 int LedStat = 1 ; // Etat des led 0:off 1:R 2:B 3:G
 
@@ -180,7 +195,6 @@ if(ModeL==0){
     digitalWrite(ledBPin,0); 
   return;
 }
-
 if (TmrLed.TimeJustDone==1){
   LedStat=LedStat+1;
   if (LedStat==4)LedStat=1;  // Entre 1 et 3
@@ -202,9 +216,7 @@ if (TmrLed.TimeJustDone==1){
   }
   return;
 }
-
 }
-
 //================================================================================================================================
 int BpStat=0;
 int mode =0;
@@ -252,6 +264,8 @@ int GetInputT(void) // Lecture des boutons Tune
 // Gestion de la fonction TUNE
 {
 BpStat = digitalRead(BpSPin);
+
+
 if(TmrBpTune.timeToGo==0 && bSaT==0){
 if (BpStat==0){
   bSaT=1;
@@ -283,8 +297,6 @@ if (BpStat==0){
 }}
 return 999;
 }
-
-
 //================================================================================================================================
 void Mode(void){ 
 // Controle des fonctions. 
@@ -294,18 +306,25 @@ GetInputT();
 return ;
 
 }
-
-
 //================================================================================================================================
 bool BuzzOn =0 ;
 void SavBatt(void)  // Alerte de sauvegarde batteries
 {
-  if (TmrPower.TimeJustDone==1){ 
-    BuzzOn=1;
-    ledcWriteTone(channel,440);   // Jouer la note
-    }
 
-  if(ModeL==0 && ModeT==0 && TmrPower.timeToGo==0 && BuzzOn==0)
+
+  if (TmrPower.TimeJustDone==1) BuzzOn=1;
+
+ if (BuzzOn==1)
+ {
+  //if((ModeL==1) || (ModeT==1)) return ;
+    ledcWriteTone(channel,440);   // Jouer la note
+    //delay(1000);
+    //Serial.println("Cest bien ici");
+    //ledcWriteTone(channel,0);     // Stopper la note
+   // delay(3000);
+ }
+
+   if(ModeL==0 && ModeT==0 && TmrPower.timeToGo==0 && BuzzOn==0)
   TmrPower.StartTimer(1);
   if ((ModeL==1 || ModeT==1)&& BuzzOn==1){
   ledcWriteTone(channel,0);     // Stopper la note
@@ -317,15 +336,7 @@ return ;
 //================================================================================================================================
 // Main
 //================================================================================================================================
-// Io Pins nunber
-// int SoundPin= 19;   // Sortie de son Tone
-// int ledRPin = 32    // Red     
-// int ledGPin = 33;   // Green
-// int ledBPin = 25;   // Blue
-// int BpLPin  = 26;   // Bb Led on
-// int BpSPin  = 27;   // Bp Sound on
 
-//====================================================================================
 
 
 //====================================================================================
@@ -335,9 +346,9 @@ void setup() {
 // Définition des I/O
 
 ledcAttachPin(SoundPin,channel);  // Assigner la sortie au son.
-int ledRPin = 32; // Red led  
-int ledGPin = 33; // Green led
-int ledBPin = 25; // Blue led 
+//int ledRPin = 32; // Red led  
+//int ledGPin = 33; // Green led
+//int ledBPin = 25; // Blue led 
 
 pinMode(ledRPin, OUTPUT);       // Led Red
 pinMode(ledGPin, OUTPUT);       // Led Green
@@ -365,7 +376,6 @@ void loop() {
  TmrBpLed.TimerUpdate();TmrBpTune.TimerUpdate(); 
  TmrNote.TimerUpdate(); TmrPower.TimerUpdate(); TmrLed.TimerUpdate(); 
  TmrPrint.TimerUpdate();
-
 
 
 // Appelle les fonctions.
