@@ -13,6 +13,7 @@
 // V30.33 Version développée pour seeed_xiao_esp32s3
 // V30.34 Stopper la tune si on désactive le bouton pendant l'exécution.
 // V30.35 Version pour Esp32 XIAO
+// V30.36 Test des fonctions de SaveBatt et ajout de timer TmrBuzzer
 // TODO
 // Rendre intermittent 20% On 80% Off  l'alerte de save battery
 //================================================================================================================================
@@ -109,6 +110,7 @@ NbTimer TmrBpTune(2000,0);          // Pb bouncing musique
 NbTimer TmrNote(150,0);             // Tempo de le note
 NbTimer TmrPower(15000,0);          // Tempo Power save
 NbTimer TmrLed(250,1);              // Tempo Cycle des leds
+NbTimer TmrBuzzer(10000,0);          // Tempo Cyclage du buzzer de power on
 NbTimer TmrPrint(1000,1);           // Tempo de DEBUG pour imprimer.
 //================================================================================================================================
 // Fonctions diverses.
@@ -310,26 +312,19 @@ return ;
 bool BuzzOn =0 ;
 void SavBatt(void)  // Alerte de sauvegarde batteries
 {
+// Gerer le mode Buzzer Buzz
 
+if (TmrPower.TimeJustDone==1) BuzzOn=1;
 
-  if (TmrPower.TimeJustDone==1) BuzzOn=1;
-
- if (BuzzOn==1)
- {
-  //if((ModeL==1) || (ModeT==1)) return ;
-    ledcWriteTone(channel,440);   // Jouer la note
-    //delay(1000);
-    //Serial.println("Cest bien ici");
-    //ledcWriteTone(channel,0);     // Stopper la note
-   // delay(3000);
- }
-
-   if(ModeL==0 && ModeT==0 && TmrPower.timeToGo==0 && BuzzOn==0)
+if(ModeL==0 && ModeT==0 && TmrPower.timeToGo==0 && BuzzOn==0){
   TmrPower.StartTimer(1);
-  if ((ModeL==1 || ModeT==1)&& BuzzOn==1){
-  ledcWriteTone(channel,0);     // Stopper la note
-  BuzzOn=0;}
-     
+     }
+if (ModeL==1 || ModeT==1)BuzzOn=0;
+
+//
+
+
+
 return ;
 }
 
@@ -367,6 +362,7 @@ Serial.begin(115200);  // Activer la console pour Debug
 // Démarrage des timers récurrents.
 
 TmrPrint.StartTimer(1); TmrLed.StartTimer(1);
+TmrBuzzer.StartTimer(1);
 
 }
 
@@ -375,7 +371,7 @@ void loop() {
 // Rafraichit les timers a chaque cycle
  TmrBpLed.TimerUpdate();TmrBpTune.TimerUpdate(); 
  TmrNote.TimerUpdate(); TmrPower.TimerUpdate(); TmrLed.TimerUpdate(); 
- TmrPrint.TimerUpdate();
+ TmrBuzzer.TimerUpdate(); TmrPrint.TimerUpdate();
 
 
 // Appelle les fonctions.
@@ -389,6 +385,9 @@ PlayNote(); // Joue la mélodie.
 // Impression de debugging a la seconde.
 if(TmrPrint.TimeJustDone){
   sprintf(buffer," MAIN Mode Led  %d  Tune  %d  Buzz  %d ",ModeL,ModeT,BuzzOn);
+  Serial.println(buffer);
+  if (ModeL==1)TmrBuzzer.StartTimer(1);
+  sprintf(buffer," MAIN TmrBuzzer Ttg %d ", TmrBuzzer.timeToGo);
   Serial.println(buffer);
 } 
 }
