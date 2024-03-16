@@ -14,11 +14,15 @@
 // V30.34 Stopper la tune si on désactive le bouton pendant l'exécution.
 // V30.35 Version pour Esp32 XIAO
 // V30.36 Test des fonctions de SaveBatt et ajout de timer TmrBuzzer
-// TODO
-// Rendre intermittent 20% On 80% Off  l'alerte de save battery
 // Clonée en GrelotV3
+// V30.37 Gestion du mode TmrBuzzer Ok sans output 440hz....
+// V30.38
+
+// TODO
+// Implanter 440 Hz sur mode TmrBuzzer
+// Rendre intermittent 20% On 80% Off  l'alerte de save battery
+// Stopper la melodie avant sa fin.
 //================================================================================================================================
-// Io Gpio number seeed_xiao_esp32s3
 
  #define ledBPin   7  // Blue   
  #define ledGPin   8  // Green
