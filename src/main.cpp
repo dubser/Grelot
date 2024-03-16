@@ -16,6 +16,7 @@
 // V30.36 Test des fonctions de SaveBatt et ajout de timer TmrBuzzer
 // TODO
 // Rendre intermittent 20% On 80% Off  l'alerte de save battery
+// Clonée en GrelotV3
 //================================================================================================================================
 // Io Gpio number seeed_xiao_esp32s3
 
