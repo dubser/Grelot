@@ -114,9 +114,9 @@ void NbTimer::resetTimer(){
 NbTimer TmrBpLed(2000,0);           // Pb bouncing led
 NbTimer TmrBpTune(2000,0);          // Pb bouncing musique
 NbTimer TmrNote(150,0);             // Tempo de le note
-NbTimer TmrPower(15000,0);          // Tempo Power save
+NbTimer TmrPower(15000,1);          // Tempo Power save
 NbTimer TmrLed(250,1);              // Tempo Cycle des leds
-NbTimer TmrBuzzer(10000,0);          // Tempo Cyclage du buzzer de power on
+NbTimer TmrBuzzer(1000,1);          // Tempo Cyclage du buzzer de power on
 NbTimer TmrPrint(1000,1);           // Tempo de DEBUG pour imprimer.
 //================================================================================================================================
 // Fonctions diverses.
@@ -305,33 +305,59 @@ if (BpStat==0){
 }}
 return 999;
 }
+
 //================================================================================================================================
 void Mode(void){ 
 // Controle des fonctions. 
 GetInputL();
 GetInputT();
-
 return ;
-
 }
+
 //================================================================================================================================
 bool BuzzOn =0 ;
-void SavBatt(void)  // Alerte de sauvegarde batteries
+int Spo = 0 ;   // Status power off  
+bool v2b0 =0;        // Value 2 buttons off
+int AlmCyc =0 ;       // Cyclage de alarme.
+int done =0 ;        // Pour solution d'un bug
+int SavBatt(void)  // Alerte de sauvegarde batteries
 {
-// Gerer le mode Buzzer Buzz
+v2b0 = !ModeL&&!ModeT; // 2 états a OFF 
 
-if (TmrPower.TimeJustDone==1) BuzzOn=1;
+bool front=0;
 
-if(ModeL==0 && ModeT==0 && TmrPower.timeToGo==0 && BuzzOn==0){
-  TmrPower.StartTimer(1);
-     }
-if (ModeL==1 || ModeT==1)BuzzOn=0;
+// Detection du front de frontière de cycle
+if(TmrPower.timeToGo!=0) done=0; 
+if (done==1)return 0 ;
+if (TmrPower.TimeJustDone==1){
+  done=1; front =1;
+}
 
-//
+if(front==1) { // Front montant
+  front=0;
+// 2 boutons inactifs
+ if(v2b0==1 && Spo==0){Spo=1; return 1;}
+ if(v2b0==1 && Spo==1){Spo=1; BuzzOn=1; return 2;}
+ if(v2b0==1 && Spo==2){Spo=0; return 3;}
+}
+
+// Au mons 1  bouton actif
+if(front!=1) {
+ if(v2b0==0 && Spo==1){Spo=2; return 4;}
+ if(v2b0==0 && BuzzOn==1){Spo=0; BuzzOn=0; return 5;}
+}
+
+//  Cyclage du buzzer 
+if(TmrBuzzer.TimeJustDone==1){
+  AlmCyc = AlmCyc +1;
+  if (AlmCyc>=4)AlmCyc=0;
+}
+
+if (BuzzOn==1 && AlmCyc ==1 && TmrBuzzer.TimeJustDone==1)ledcWriteTone(channel,440);   // Jouer la note
+if (BuzzOn==1 && AlmCyc ==2 && TmrBuzzer.TimeJustDone==1)ledcWriteTone(channel,0);     // Stopper la note
 
 
-
-return ;
+return 99;
 }
 
 //================================================================================================================================
@@ -368,7 +394,7 @@ Serial.begin(115200);  // Activer la console pour Debug
 // Démarrage des timers récurrents.
 
 TmrPrint.StartTimer(1); TmrLed.StartTimer(1);
-TmrBuzzer.StartTimer(1);
+TmrBuzzer.StartTimer(1); TmrPower.StartTimer(1);
 
 }
 
@@ -392,9 +418,9 @@ PlayNote(); // Joue la mélodie.
 if(TmrPrint.TimeJustDone){
   sprintf(buffer," MAIN Mode Led  %d  Tune  %d  Buzz  %d ",ModeL,ModeT,BuzzOn);
   Serial.println(buffer);
-  if (ModeL==1)TmrBuzzer.StartTimer(1);
-  sprintf(buffer," MAIN TmrBuzzer Ttg %d ", TmrBuzzer.timeToGo);
-  Serial.println(buffer);
+
+  // sprintf(buffer," MAIN AlmCyc %d", AlmCyc);
+  // Serial.println(buffer);
 } 
 }
 
