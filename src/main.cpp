@@ -18,12 +18,10 @@
 // V30.37 Gestion du mode TmrBuzzer Ok sans output 440hz....
 // V30.38 Enleve Dropbox /Dropbox/Serge/Programmation/GrelotV3/Grelot
 // migrer a /Dropbox/Serge/Programmation/ProgVsCode/Grelotv3/
-// Branche test.
+// V30.40 Version complète a tester en Beta.
 
 // TODO
-// Implanter 440 Hz sur mode TmrBuzzer
-// Rendre intermittent 20% On 80% Off  l'alerte de save battery
-// Stopper la melodie avant sa fin.
+
 //================================================================================================================================
 
  #define ledBPin   7  // Blue   
