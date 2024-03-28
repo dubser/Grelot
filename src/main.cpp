@@ -19,8 +19,11 @@
 // V30.38 Enleve Dropbox /Dropbox/Serge/Programmation/GrelotV3/Grelot
 // migrer a /Dropbox/Serge/Programmation/ProgVsCode/Grelotv3/
 // V30.40 Version complète a tester en Beta.
+// V30.41 Buzz cycle trop long il a été raccourci.
+// V30.42 La 1e et dernière notes fautives.
 
 // TODO
+
 
 //================================================================================================================================
 
@@ -115,7 +118,7 @@ NbTimer TmrBpTune(2000,0);          // Pb bouncing musique
 NbTimer TmrNote(150,0);             // Tempo de le note
 NbTimer TmrPower(15000,1);          // Tempo Power save
 NbTimer TmrLed(250,1);              // Tempo Cycle des leds
-NbTimer TmrBuzzer(1000,1);          // Tempo Cyclage du buzzer de power on
+NbTimer TmrBuzzer(200,1);          // Tempo Cyclage du buzzer de power on
 NbTimer TmrPrint(1000,1);           // Tempo de DEBUG pour imprimer.
 //================================================================================================================================
 // Fonctions diverses.
@@ -151,7 +154,7 @@ return;
 // Est-ce la 1e note 0 et ModeT est il actif.
 // Jouer cette note
 if (NoteInd==0 && ModeT==1) {
- sprintf(buffer,"                                       PLAYNOTE NoteInd %d ",NoteInd);
+ sprintf(buffer,"PLAYNOTE ------- NoteInd %d ",NoteInd);
  Serial.println(buffer);
  //tone(SoundPin, melody[NoteInd], beat[NoteInd]*50);  
  ledcWriteTone(channel,melody[NoteInd]);   // Jouer la note  
@@ -167,22 +170,24 @@ if(TmrNote.TimeJustDone && NoteInd!=0 && beat[NoteInd]!=0){
 
  ledcWriteTone(channel,melody[NoteInd]);              // Jouer la note  
  TmrNote.StartTimer(beat[NoteInd]);                  // A and wait for same ms
- ++ NoteInd;  // Et Pointer la prochaine note
-
-  sprintf(buffer,"PLAYNOTE ++++++++ After PLAYING NoteInd: %d Freq: %d Beat: %d",
-   NoteInd,melody[NoteInd],beat[NoteInd]);
+// ++ NoteInd;  // Et Pointer la prochaine note
+  sprintf(buffer,"%d PLAYNOTE +++++++ PLAYNOTE PLAYING NoteInd: %d Freq: %d Beat: %d",
+    millis(),NoteInd,melody[NoteInd],beat[NoteInd]);
    Serial.println(buffer);
-
+   NoteInd=NoteInd+1;  // Et Pointer la prochaine note
 return;
 }
 //====================================================================================
 
 // Si c'est la dernière note désactiver ModeT et pointer 
 // la note 0 .
-if(ModeT==1 && beat[NoteInd]==0){
+if(TmrNote.TimeJustDone && ModeT==1 && beat[NoteInd]==0){
+  ledcWriteTone(channel,0);     // Stopper la note
+  sprintf(buffer,"%d PLAYNOTE ******* NO  NOTE PLAYING NoteInd: %d Freq: %d Beat: %d",
+   millis(),NoteInd,melody[NoteInd],beat[NoteInd]);
+   Serial.println(buffer);
   ModeT=0;
   NoteInd=0;
-  ledcWriteTone(channel,0);     // Stopper la note
 return;
 }
 }
@@ -349,7 +354,7 @@ if(front!=1) {
 //  Cyclage du buzzer 
 if(TmrBuzzer.TimeJustDone==1){
   AlmCyc = AlmCyc +1;
-  if (AlmCyc>=4)AlmCyc=0;
+  if (AlmCyc >= 100)AlmCyc=0;
 }
 
 if (BuzzOn==1 && AlmCyc ==1 && TmrBuzzer.TimeJustDone==1)ledcWriteTone(channel,440);   // Jouer la note
