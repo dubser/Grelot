@@ -27,7 +27,7 @@
 
 
 //================================================================================================================================
-
+// # de GPIO 
  #define ledBPin   7  // Blue   
  #define ledGPin   8  // Green
  #define ledRPin   9  // Red  
@@ -423,6 +423,8 @@ PlayNote(); // Joue la mélodie.
 if(TmrPrint.TimeJustDone){
   sprintf(buffer," MAIN Mode Led  %d  Tune  %d  Buzz  %d ",ModeL,ModeT,BuzzOn);
   Serial.println(buffer);
+
+  //Serial.println("Allo running");
 
   // sprintf(buffer," MAIN AlmCyc %d", AlmCyc);
   // Serial.println(buffer);
